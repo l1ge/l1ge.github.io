@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en-us">
   <title>l1ge&#39;s cabin</title>
-  <subtitle>OverTheWire: Leviathan 2 Write-Up Write-up for Leviathan level 2 the FUN way May 4, 2020 4:00PM</subtitle>
+  <subtitle></subtitle>
   <id>https://l1ge.github.io/</id>
   <author>
     <name>l1ge&#39;s cabin</name>
@@ -9,17 +9,17 @@
   </author>
   <icon>https://l1ge.github.io/image/brand/icon-1-1.png</icon>
   <logo>https://l1ge.github.io/image/brand/icon-2-1.png</logo>
-  <updated>2020-05-05T17:43:39Z</updated>
+  <updated>2020-05-05T18:24:29Z</updated>
   <link rel="self" type="application/atom+xml" href="https://l1ge.github.io/feed.atom" hreflang="en-us"/>
   <link rel="alternate" type="text/html" href="https://l1ge.github.io/" hreflang="en-us"/>
   <entry>
     <title>OverTheWire: Leviathan 2 Write-Up</title><author>
       <name>l1ge</name>
-      <uri></uri>
+      <uri>https://l1ge.github.io</uri>
     </author>
     <id>https://l1ge.github.io/leviathan2/</id>
-    <updated>2020-05-04T14:00:00Z</updated>
-    <published>2020-05-04T14:00:00Z</published>
+    <updated>2020-05-05T18:00:00Z</updated>
+    <published>2020-05-05T18:00:00Z</published>
     <content type="html"><p>There are plenty of write-ups out there for Leviathan's Level 2.  But none of them solved it the way I did: <strong>the fun way!</strong> - When you miss the very obvious solution but your qwerky way finally work</p>
 <p>Let's first access the level</p>
 <blockquote>
