@@ -9,7 +9,7 @@
   </author>
   <icon>https://l1ge.github.io/image/brand/icon-1-1.png</icon>
   <logo>https://l1ge.github.io/image/brand/icon-2-1.png</logo>
-  <updated>2020-05-19T18:53:11Z</updated>
+  <updated>2020-05-19T18:54:47Z</updated>
   <link rel="self" type="application/atom+xml" href="https://l1ge.github.io/feed.atom" hreflang="en-us"/>
   <link rel="alternate" type="text/html" href="https://l1ge.github.io/" hreflang="en-us"/>
   <entry>
@@ -307,8 +307,8 @@ sh-4.2$ whoami
 user2
 </code></pre>
 <p>You're user2, <code>cat secret.txt</code> and enjoy.</p>
-<p>Task 9 works exactly the same way with a different offset. Good luck !</p>
-<p>l1ge.</p></content>
+<p>Task 9 works exactly the same way with a different offset.</p>
+<p>Good luck ! -l1ge.</p></content>
   </entry>
   <entry>
     <title>OverTheWire: Leviathan 2 Write-Up</title><author>
