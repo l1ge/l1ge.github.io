@@ -9,7 +9,7 @@
   </author>
   <icon>https://l1ge.github.io/image/brand/icon-1-1.png</icon>
   <logo>https://l1ge.github.io/image/brand/icon-2-1.png</logo>
-  <updated>2020-05-19T16:19:24Z</updated>
+  <updated>2020-05-19T16:26:44Z</updated>
   <link rel="self" type="application/atom+xml" href="https://l1ge.github.io/feed.atom" hreflang="en-us"/>
   <link rel="alternate" type="text/html" href="https://l1ge.github.io/" hreflang="en-us"/>
   <entry>
@@ -103,7 +103,8 @@ es             0x0	0
 fs             0x0	0
 </code></pre>
 <p>We see that the rbp has been overridden with the pattern. We then use metasploit's  <code>pattern-offset.rb</code> to query the pattern we found in the rbp</p>
-<pre><code class="language-bash">$/usr/share/metasploit-framework/tools/exploit/pattern_offset.rb -l 200 -q 6641396541386541
+<pre><code class="language-bash">┌─[✗]─[l1ge@parrot]─[~]
+└──╼$/usr/share/metasploit-framework/tools/exploit/pattern_offset.rb -l 200 -q 6641396541386541
 [*] Exact match at offset 144
 </code></pre>
 <p>It says that our rbp starts with an offset of 144. We know the rbp is 8 bytes so 144+8 = <strong>152</strong>. The offset we manually found is confirmed.</p>
@@ -277,7 +278,8 @@ syscall
 <p><strong>With Pwntools</strong></p>
 <p>You can use <a href="http://docs.pwntools.com/en/stable/">pwntools</a> and its shellcraft module to generate shellcodes for you. We already have a working shell code to get a shell, so we just need to add to it the setreuid() part.</p>
 <p>Install pwntools following the instruction on their site. Then run:</p>
-<pre><code class="language-bash">$pwn shellcraft -f d amd64.linux.setreuid 1002
+<pre><code class="language-bash">┌─[✗]─[l1ge@parrot]─[~]
+└──╼$pwn shellcraft -f a amd64.linux.setreuid
 </code></pre>
 <p><code>-f d</code> sets the format to &quot;escaped&quot;.  You can set <code>-f a</code> to look at the assembly version</p>
 <p><em>Side note: It would also work if you don't specify the UID 1002 .  It would automatically grab the effective UID with geteuid() and set it as your Real UID. But I keep it that way to make things clearer.</em></p>
