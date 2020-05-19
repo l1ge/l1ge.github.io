@@ -9,7 +9,7 @@
   </author>
   <icon>https://l1ge.github.io/image/brand/icon-1-1.png</icon>
   <logo>https://l1ge.github.io/image/brand/icon-2-1.png</logo>
-  <updated>2020-05-19T16:29:04Z</updated>
+  <updated>2020-05-19T16:32:28Z</updated>
   <link rel="self" type="application/atom+xml" href="https://l1ge.github.io/feed.atom" hreflang="en-us"/>
   <link rel="alternate" type="text/html" href="https://l1ge.github.io/" hreflang="en-us"/>
   <entry>
@@ -63,7 +63,8 @@ Program received signal SIGSEGV, Segmentation fault.
 <p>So we know that with 158 bytes we override the 6-bytes-long return address. It means our offset to reach the start of the return address is 158-6 = <strong>152</strong></p>
 <p><strong>Method 2 : With Metasploit's tool</strong></p>
 <p>We create a pattern of a random length with the tool <code>pattern_create.rb</code> from  Metasploit's framework. Let's try a 200 bytes pattern.</p>
-<pre><code class="language-bash">$/usr/share/metasploit-framework/tools/exploit/pattern_create.rb -l 200
+<pre><code class="language-bash">┌─[✗]─[l1ge@parrot]─[~]
+└──╼$/usr/share/metasploit-framework/tools/exploit/pattern_create.rb -l 200
 Aa0Aa1Aa2Aa3Aa4Aa5Aa6Aa7Aa8Aa9Ab0Ab1Ab2Ab3Ab4Ab5Ab6Ab7Ab8Ab9Ac0Ac1Ac2Ac3Ac4Ac5Ac6Ac7Ac8Ac9Ad0Ad1Ad2Ad3Ad4Ad5Ad6Ad7Ad8Ad9Ae0Ae1Ae2Ae3Ae4Ae5Ae6Ae7Ae8Ae9Af0Af1Af2Af3Af4Af5Af6Af7Af8Af9Ag0Ag1Ag2Ag3Ag4Ag5Ag
 </code></pre>
 <p>We copy that pattern and run the binary in gdb with it</p>
