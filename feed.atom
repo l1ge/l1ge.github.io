@@ -9,7 +9,7 @@
   </author>
   <icon>https://l1ge.github.io/image/brand/icon-1-1.png</icon>
   <logo>https://l1ge.github.io/image/brand/icon-2-1.png</logo>
-  <updated>2020-05-20T10:58:28Z</updated>
+  <updated>2020-05-20T11:10:00Z</updated>
   <link rel="self" type="application/atom+xml" href="https://l1ge.github.io/feed.atom" hreflang="en-us"/>
   <link rel="alternate" type="text/html" href="https://l1ge.github.io/" hreflang="en-us"/>
   <entry>
@@ -241,7 +241,7 @@ user3❌1003:1003::/home/user3:/bin/bash
 <h1>0x5 Modifying the shell code</h1>
 <p>Depending on your knowledge in assembly and in C, there are different ways to approach it:</p>
 <ul>
-<li>You can write your shellcode in C, compile it, look at the assembly code, remove the bad characters and us it in your exploit.</li>
+<li>You can write your shellcode in C, compile it, look at the assembly code, remove the bad characters and use it in your exploit.</li>
 <li>You can go straight to assembly, find an existing shell code that uses setreuid() and modify it.</li>
 <li>The easiest option : you can use <a href="http://docs.pwntools.com/en/stable/">pwntools</a></li>
 </ul>
@@ -249,7 +249,7 @@ user3❌1003:1003::/home/user3:/bin/bash
 <p>I personally did the 2nd option before i realized pwntools would have been easier. If you're in a hurry go straight to that part bellow.</p>
 <p>I grabbed <a href="http://shell-storm.org/shellcode/files/shellcode-77.php">this shell code</a> that setuid(0) , drops a shell and exits. I went to an IRC assembly channel and asked for help to modify it.</p>
 <p>First my goal was to setuid(1002), someone helped me to do that. But as I said above, it wasn't enough to become user2. Then I was able to modify it to call setreuid() instead of setuid().  I had to look for the function's %rax number in this <a href="https://blog.rchapman.org/posts/Linux_System_Call_Table_for_x86_64/">Linux System Call Table</a></p>
-<p>setreuid()'s rax number is 113 ( 0x71in hex).  And it takes its two arguments from the rdi and rsi registers.</p>
+<p>setreuid()'s rax number is 113 ( 0x71 in hex).  And it takes its two arguments from the rdi and rsi registers.</p>
 <p>Here was my assembly code in the end:</p>
 <pre><code class="language-assembly">xor    rdi,rdi			&lt;------ set the rdi to 0
 xor    rax,rax		
@@ -283,7 +283,7 @@ syscall
 <p>You can use <a href="http://docs.pwntools.com/en/stable/">pwntools</a> and its shellcraft module to generate shellcodes for you. We already have a working shell code to get a shell, so we just need to add to it the setreuid() part.</p>
 <p>Install pwntools following the instruction on their site. Then run:</p>
 <pre><code class="language-bash">┌─[✗]─[l1ge@parrot]─[~]
-└──╼$pwn shellcraft -f a amd64.linux.setreuid
+└──╼$pwn shellcraft -f d amd64.linux.setreuid
 </code></pre>
 <p><code>-f d</code> sets the format to &quot;escaped&quot;.  You can set <code>-f a</code> to look at the assembly version</p>
 <p><em>Side note: It would also work if you don't specify the UID 1002 .  It would automatically grab the effective UID with geteuid() and set it as your Real UID. But I keep it that way to make things clearer.</em></p>
