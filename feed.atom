@@ -9,11 +9,11 @@
   </author>
   <icon>https://l1ge.github.io/image/brand/icon-1-1.png</icon>
   <logo>https://l1ge.github.io/image/brand/icon-2-1.png</logo>
-  <updated>2022-03-27T21:11:50Z</updated>
+  <updated>2022-04-23T13:54:08Z</updated>
   <link rel="self" type="application/atom+xml" href="https://l1ge.github.io/feed.atom" hreflang="en-us"/>
   <link rel="alternate" type="text/html" href="https://l1ge.github.io/" hreflang="en-us"/>
   <entry>
-    <title>TryHackMe: Buffer Overflows (Bof1) , Task 8 - Write Up</title><author>
+    <title>TryHackMe/Buffer_Overflows_(Bof1) _Task_8 _Write-up</title><author>
       <name>l1ge</name>
       <uri>https://l1ge.github.io</uri>
     </author>
@@ -226,12 +226,12 @@ total 20
 <p>First, for security reasons,  the setuid bit is given only when it's necessary. As I understood it, you would have to add in the shell code a function that says &quot;now its necessary to give setuid(UID) to run the next command&quot;.  So I first tried to do just that.</p>
 <p>I looked for user's 2 UID</p>
 <pre><code class="language-bash">$ cat /etc/passwd
-root❌0:0:root:/root:/bin/bash
+root:x:0:0:root:/root:/bin/bash
 .
 .
-user1❌1001:1001::/home/user1:/bin/bash
-user2❌1002:1002::/home/user2:/bin/bash  
-user3❌1003:1003::/home/user3:/bin/bash
+user1:x:1001:1001::/home/user1:/bin/bash
+user2:x:1002:1002::/home/user2:/bin/bash  
+user3:x:1003:1003::/home/user3:/bin/bash
 </code></pre>
 <p>We can see the UID of user2 is 1002. And I looked for a way to add the function <code>setuid(1002)</code> at the top of my shell code and thus become user2 in the shell.</p>
 <p>But... that didn't work. Which takes me to the second reason:</p>
@@ -311,7 +311,7 @@ user2
 <p>Good luck ! -l1ge.</p></content>
   </entry>
   <entry>
-    <title>OverTheWire: Leviathan 2 Write-Up</title><author>
+    <title>OverTheWire/Leviathan_2 _Write-up</title><author>
       <name>l1ge</name>
       <uri>https://l1ge.github.io</uri>
     </author>
