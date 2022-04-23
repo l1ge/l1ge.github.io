@@ -2,22 +2,46 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://l1ge.github.io/categories/</loc>
-    <lastmod>2020-05-19T13:00:00Z</lastmod>
+    <lastmod>2022-04-22T16:00:00Z</lastmod>
+  </url>
+  <url>
+    <loc>https://l1ge.github.io/tags/hackthebox/</loc>
+    <lastmod>2022-04-22T16:00:00Z</lastmod>
+  </url>
+  <url>
+    <loc>https://l1ge.github.io/htb_backdoor/</loc>
+    <lastmod>2022-04-22T16:00:00Z</lastmod>
   </url>
   <url>
     <loc>https://l1ge.github.io/</loc>
-    <lastmod>2020-05-19T13:00:00Z</lastmod>
+    <lastmod>2022-04-22T16:00:00Z</lastmod>
+  </url>
+  <url>
+    <loc>https://l1ge.github.io/tags/linux/</loc>
+    <lastmod>2022-04-22T16:00:00Z</lastmod>
   </url>
   <url>
     <loc>https://l1ge.github.io/posts/</loc>
-    <lastmod>2020-05-19T13:00:00Z</lastmod>
-  </url>
-  <url>
-    <loc>https://l1ge.github.io/tags/reverse-engineering/</loc>
-    <lastmod>2020-05-19T13:00:00Z</lastmod>
+    <lastmod>2022-04-22T16:00:00Z</lastmod>
   </url>
   <url>
     <loc>https://l1ge.github.io/tags/</loc>
+    <lastmod>2022-04-22T16:00:00Z</lastmod>
+  </url>
+  <url>
+    <loc>https://l1ge.github.io/tags/wordpress/</loc>
+    <lastmod>2022-04-22T16:00:00Z</lastmod>
+  </url>
+  <url>
+    <loc>https://l1ge.github.io/tags/write-up/</loc>
+    <lastmod>2022-04-22T16:00:00Z</lastmod>
+  </url>
+  <url>
+    <loc>https://l1ge.github.io/categories/write-ups/</loc>
+    <lastmod>2022-04-22T16:00:00Z</lastmod>
+  </url>
+  <url>
+    <loc>https://l1ge.github.io/tags/reverse-engineering/</loc>
     <lastmod>2020-05-19T13:00:00Z</lastmod>
   </url>
   <url>
@@ -26,14 +50,6 @@
   </url>
   <url>
     <loc>https://l1ge.github.io/tryhackme_bof1/</loc>
-    <lastmod>2020-05-19T13:00:00Z</lastmod>
-  </url>
-  <url>
-    <loc>https://l1ge.github.io/tags/write-up/</loc>
-    <lastmod>2020-05-19T13:00:00Z</lastmod>
-  </url>
-  <url>
-    <loc>https://l1ge.github.io/categories/write-ups/</loc>
     <lastmod>2020-05-19T13:00:00Z</lastmod>
   </url>
   <url>
